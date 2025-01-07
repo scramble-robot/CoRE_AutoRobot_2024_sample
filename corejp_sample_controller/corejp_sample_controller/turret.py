@@ -14,9 +14,9 @@ class Turret(Node):
         
         self.yaw_data = 0.0
         self.ratio_yaw = 2.0
-        self.offset_yaw = math.radians(295)
+        self.offset_yaw = math.radians(175)
         self.yaw_angle_converter = AngleConverter(self.ratio_yaw, self.offset_yaw)
-        self.pid_yaw = PID(20000.0, 0.0, 100000.0)
+        self.pid_yaw = PID(10000.0, 0.0, 1000.0)
         self.pid_yaw.target(0)
         self.yaw_pub = self.create_publisher(Int64, '/can_node/gm6020_1/target_volt', 10)
         self.subscription_yaw = self.create_subscription(Float64, '/yaw', self.callback_yaw, 10)
@@ -26,7 +26,7 @@ class Turret(Node):
         self.ratio_pitch = -3.0
         self.offset_pitch = math.radians(120)
         self.pitch_angle_converter = AngleConverter(self.ratio_pitch, self.offset_pitch)
-        self.pid_pitch = PID(-50000.0, 0.0, -100000.0)
+        self.pid_pitch = PID(-20000.0, 0.0, -1000.0)
         self.pid_pitch.target(0)
         self.pitch_pub = self.create_publisher(Int64, '/can_node/gm6020_0/target_volt', 10)
         self.subscription_pitch = self.create_subscription(Float64, '/pitch',self.callback_pitch, 10)

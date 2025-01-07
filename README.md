@@ -42,7 +42,7 @@ DualSense <--USB--> PC <---Ethernet---> RaspberryPi <--CAN/GPIO--> 自動ロボ�
       - `ros2 topic pub /servo1/degree std_msgs/msg/Float64 data:\ 0.0`
     - 反時計回り
       - `ros2 topic pub /servo1/degree std_msgs/msg/Float64 data:\ 270.0`
-- ローラーの動作を確認する。射出方向に回っていることを確認する。
+- ローラーの動作を確認する。射出方向に回っていることを確認する。回らない場合は値を少しずつ上げる。
   - 左ローラー
     - 回す
       - `ros2 topic pub /can_node/c620_0/target_current std_msgs/msg/Float64 data:\ 1.0`
@@ -53,14 +53,14 @@ DualSense <--USB--> PC <---Ethernet---> RaspberryPi <--CAN/GPIO--> 自動ロボ�
       - `ros2 topic pub /can_node/c620_1/target_current std_msgs/msg/Float64 data:\ -1.0`
     - 止める
       - `ros2 topic pub /can_node/c620_1/target_current std_msgs/msg/Float64 data:\ 0.0`
-- Pitch回転の動作を確認する。(動きを確認したら速やかにCtrl-Cで出力を止めて、素早く停止の命令を入力し送る)
+- Pitch回転の動作を確認する。回らない場合は値を少しずつ上げる。(動きを確認したら速やかにCtrl-Cで出力を止めて、素早く停止の命令を入力し送る)
   - 上に
     - `ros2 topic pub /can_node/gm6020_0/target_volt std_msgs/msg/Int64 data:\ -5000`
   - 下に
     - `ros2 topic pub /can_node/gm6020_0/target_volt std_msgs/msg/Int64 data:\ 5000`
   - 停止
     - `ros2 topic pub /can_node/gm6020_0/target_volt std_msgs/msg/Int64 data:\ 0`
-- Yaw回転の動作を確認する。(動きを確認したら速やかにCtrl-Cで出力を止めて、素早く停止の命令を入力し送る)
+- Yaw回転の動作を確認する。回らない場合は値を少しずつ上げる。(動きを確認したら速やかにCtrl-Cで出力を止めて、素早く停止の命令を入力し送る)
   - 右に
     - `ros2 topic pub /can_node/gm6020_1/target_volt std_msgs/msg/Int64 data:\ -3000`
   - 左に
@@ -74,9 +74,9 @@ DualSense <--USB--> PC <---Ethernet---> RaspberryPi <--CAN/GPIO--> 自動ロボ�
     - 例として、サンプルプログラムを試した機体ではおよそ120°。
 - Yaw回転の原点を確認
   - 現在の値を出力する
-    - `ros2 topic echo /can_node/gm6020_0/degree`
+    - `ros2 topic echo /can_node/gm6020_1/degree`
   - 前方に向けた時の数値を記録する
-    - 例として、サンプルプログラムを試した機体ではおよそ295°。
+    - 例として、サンプルプログラムを試した機体ではおよそ175°。
 
 ## サンプルプログラムの実行
 ## 環境構築
@@ -101,7 +101,7 @@ rosdep install -i --from-paths .
   - Pitch回転の原点を入力する
     - `self.offset_pitch = math.radians(120)`となっている部分の120の部分を、確認した原点の値に置き換える
   - Yaw回転の原点を入力する
-    - `self.offset_yaw = math.radians(295)`となっている部分の295の部分を、確認した原点の値に置き換える
+    - `self.offset_yaw = math.radians(175)`となっている部分の175の部分を、確認した原点の値に置き換える
 - 最初の動作確認では、ボールを入れないことを推奨
 
 ### ビルド
@@ -120,7 +120,7 @@ source ./install/setup.bash
 ### 手動操作
 - PID制御を有効化する
   - **L1**を押し続けると、各モーターに制御が入り、砲口は原点を向く
-  - ここで異常な振動や原点以外への移動が見られた場合は素早く**L1**を離し、制御を止める。
+  - ここで異常な振動や原点以外への移動が見られた場合は素早く**L1**を離し、制御を止めてゲイン調整を行う。
   - 以降の作業は全て**L1**を<u>押したまま</u>実行する。作業の合間に離すのは構わない。
 - ローラーを回す
   - **R2**を押している間、ローラーが回る。また、押し加減で速度が変化する。
@@ -139,6 +139,19 @@ source ./install/setup.bash
   - **←**ボタンでかき混ぜて、じゃばらにボールを入れる。
   - **L1**で制御を入れながら**L2**でローラーを回しながら**R1**でボールを押し出すとボールが飛んでいく。
   - ボールがローラーで詰まる場合は、**R1**の押し加減が足りず速度足りていないため。もう一度、よく押して飛ばす。
+
+### ゲイン調整
+- ジンバルのゲイン調整
+  - corejp_sample/corejp_sample_controller/corejp_sample_controller/turret.py を開く
+  - 各モータに対応した箇所のゲインを調整する
+    - `self.pid_yaw = PID(10000.0, 0.0, 1000.0)`
+    - `self.pid_pitch = PID(-20000.0, 0.0, -1000.0)`
+- ローラーのゲイン調整
+  - corejp_sample/corejp_sample_controller/corejp_sample_controller/roller.py を開く
+  - 各モータに対応した箇所のゲインを調整する
+    - `self.pid0 = PID(0.01, 0, 0)`
+    - `self.pid1 = PID(0.01, 0, 0)`
+
 
 ### 連続した射出のサンプル
 ボールを色々な方向に自動で飛ばします。

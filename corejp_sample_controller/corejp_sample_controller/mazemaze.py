@@ -15,41 +15,17 @@ class Mazemaze(Node):
             10)
         self.servo1_pub = self.create_publisher(Float64, '/servo1/degree', 10)
 
-        self.pattern = [135.0,
-                        0.0,
-                        0.0,
-                        0.0,
-                        0.0,
-                        270.0,
-                        270.0,
-                        270.0,
-                        270.0,
-                        0.0,
-                        0.0,
-                        0.0,
-                        0.0,
-                        270.0,
-                        270.0,
-                        270.0,
-                        270.0,
-                        135.0,
-                        90.0,
-                        180.0,
-                        90.0,
-                        180.0,
-                        90.0,
-                        180.0,
-                        90.0,
-                        180.0,
-                        90.0,
-                        180.0,
-                        90.0,
-                        180.0,
-                        135.0,
-                        ]
+        self.OFFSET = 10.0
+        self.pattern = [
+            0.0,
+            0.0,
+            135.0+self.OFFSET,
+            270.0,
+            135.0+self.OFFSET
+        ]
         self.index = 0
 
-        self.pullTimer = self.create_timer(0.2, self.timer_callback)
+        self.pullTimer = self.create_timer(1.0, self.timer_callback)
 
     def mazemaze(self, value):
         self.servo1_pub.publish(Float64(data=value))
